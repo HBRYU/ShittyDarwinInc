@@ -7,13 +7,17 @@ public class NeuralNetwork : MonoBehaviour
 {
     public struct Perceptron
     {
-        public List<float> Weights { get; }
+        public Dictionary<Perceptron, float> Weights { get; }
         public float Bias { get; }
 
-        public Perceptron(List<float> weights, float bias)
+        public Perceptron(float bias)
         {
-            Weights = weights;
             Bias = bias;
+        }
+
+        public void AddConnection(Perceptron perceptron, float weight)
+        {
+            Weights[perceptron] = weight;
         }
     }
     
@@ -57,7 +61,6 @@ public class NeuralNetwork : MonoBehaviour
 
     // First index: layer depth, second index: perceptron in layer.
     public List<List<Perceptron>> Topology = new List<List<Perceptron>>(); // Initialize Topology
-    public int[][][][] Connections;  // Connection from i to j
 
     public NeuralNetwork(string name, NetworkType type, int inputs, int outputs)
     {
@@ -71,20 +74,15 @@ public class NeuralNetwork : MonoBehaviour
     {
         Topology.Add(new List<Perceptron>(Inputs));
         Topology.Add(new List<Perceptron>(Outputs));
-        Connections = new int[1][][][]; // Initialize Connections array
-        Connections[0] = new int[Inputs][][];
         for (int i = 0; i < Inputs; i++)
         {
-            int edges = UnityEngine.Random.Range(0, Outputs);
-            var weights = new List<float>(new float[edges]);
-            var thisPerceptron = new Perceptron(weights, PolynomialRandom());
+            int numEdges = UnityEngine.Random.Range(0, Outputs);
+            var connectionEnds = RandomSample0(numEdges, Outputs - 1);
+            var thisPerceptron = new Perceptron(PolynomialRandom());
             Topology[0].Add(thisPerceptron);
-            Connections[0][i] = new int[edges][]; // Initialize nested array
-            var connectionEnds = RandomSample0(edges, Outputs - 1);
-            for (int j = 0; j < edges; j++)
+            for (int j = 0; j < numEdges; j++)
             {
-                Connections[0][i][j] = new[] { 1, connectionEnds[j] };
-                weights[j] = PolynomialRandom() * 2f; // [-2f, 2f]
+                thisPerceptron.AddConnection(Topology[1][connectionEnds[j]], PolynomialRandom() * 2f); // [-2f, 2f]
             }
         }
     }
@@ -115,13 +113,18 @@ public class NeuralNetwork : MonoBehaviour
                 // Process current node first before passing signal (except input layer)
                 if(layer > 0)
                     nodeValues[currentNode] = Activation(nodeValues[currentNode] + bias);
+                if (layer == Topology.Count)
+                    break;
                 
                 var currentConnections = Connections[layer][nodeIndex];
                 var currentWeights = Topology[layer][nodeIndex].Weights;
                 for (var i = 0; i < currentConnections.Length; i++)
                 {
                     var connection = currentConnections[i];
-                    if(!nodeValues.ContainsKey(GetGlobalNodeIndex(connection[0], connection[1])))
+                    if (!nodeValues.ContainsKey(GetGlobalNodeIndex(connection[0], connection[1])))
+                    {
+                        nodeValues[GetGlobalNodeIndex(connection[0], connection[1])] = 0f;
+                    }
                     nodeValues[GetGlobalNodeIndex(connection[0], connection[1])] +=
                         nodeValues[currentNode] * currentWeights[i];
                 }
