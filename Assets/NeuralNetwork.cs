@@ -1,23 +1,36 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting.FullSerializer;
 using UnityEditor.MemoryProfiler;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
-public class NeuralNetwork : MonoBehaviour
+public class NeuralNetwork
 {
-    public struct Perceptron
+    public class Perceptron
     {
         public Dictionary<Perceptron, float> Weights { get; }
         public float Bias { get; }
 
+        public float value;
+
         public Perceptron(float bias)
         {
+            const int weightCapacity = 4;
+            Weights = new Dictionary<Perceptron, float>(weightCapacity);
             Bias = bias;
+            value = 0f;
         }
 
         public void AddConnection(Perceptron perceptron, float weight)
         {
             Weights[perceptron] = weight;
+        }
+
+        public void Input(float inputValue)
+        {
+            value += inputValue;
         }
     }
     
@@ -58,9 +71,10 @@ public class NeuralNetwork : MonoBehaviour
     public readonly NetworkType Type;
     public readonly int Inputs, Outputs;
     public readonly Func<float, float> Activation = (x) => Mathf.Max(0f, x);  // ReLU
-
-    // First index: layer depth, second index: perceptron in layer.
-    public List<List<Perceptron>> Topology = new List<List<Perceptron>>(); // Initialize Topology
+    public readonly Func<float, float> InputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
+    public readonly Func<float, float> OutputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
+    
+    public List<Perceptron> perceptrons = new List<Perceptron>();
 
     public NeuralNetwork(string name, NetworkType type, int inputs, int outputs)
     {
@@ -70,90 +84,135 @@ public class NeuralNetwork : MonoBehaviour
         Outputs = outputs;
     }
 
-    public void Initialize()
+    public void Initialize(int minHiddenNodes = 2, int maxHiddenNodes = 6)
     {
-        Topology.Add(new List<Perceptron>(Inputs));
-        Topology.Add(new List<Perceptron>(Outputs));
+        Debug.Log("Initializing model");
+        int nodeCount = Random.Range(minHiddenNodes, maxHiddenNodes) + Inputs + Outputs;
+        for (int i = 0; i < nodeCount; i++)
+        {
+            perceptrons.Add(new Perceptron(PolynomialRandom()));
+        }
+
+        
+        // Input layer
         for (int i = 0; i < Inputs; i++)
         {
-            int numEdges = UnityEngine.Random.Range(0, Outputs);
-            var connectionEnds = RandomSample0(numEdges, Outputs - 1);
-            var thisPerceptron = new Perceptron(PolynomialRandom());
-            Topology[0].Add(thisPerceptron);
-            for (int j = 0; j < numEdges; j++)
+            List<int> forwardConnectionIndices = RandomSample0(Random.Range(0, nodeCount - Inputs), nodeCount - Inputs - 1);
+            for (int j = 0; j < forwardConnectionIndices.Count; j++)
             {
-                thisPerceptron.AddConnection(Topology[1][connectionEnds[j]], PolynomialRandom() * 2f); // [-2f, 2f]
+                forwardConnectionIndices[j] += Inputs;
+                perceptrons[i].AddConnection(perceptrons[forwardConnectionIndices[j]], PolynomialRandom()*2f);
+            }
+        }
+        
+        // Hidden layers
+        for (int i = Inputs; i < nodeCount - Outputs; i++)
+        {
+            List<int> forwardConnectionIndices = RandomSample0(Random.Range(1, nodeCount - i - 1), nodeCount - i - 1);
+            for (int j = 0; j < forwardConnectionIndices.Count; j++)
+            {
+                forwardConnectionIndices[j] += i;
+                if(forwardConnectionIndices[j]==i) continue;
+                perceptrons[i].AddConnection(perceptrons[forwardConnectionIndices[j]], PolynomialRandom()*2f);
+            }
+        }
+
+        PruneDeadEndPerceptrons();
+    }
+    
+    
+    private void PruneDeadEndPerceptrons()  // by GPT-4o
+    {
+        // Step 1: Identify active perceptrons that lead to outputs
+        HashSet<Perceptron> activePerceptrons = new HashSet<Perceptron>();
+
+        // Start by adding all output perceptrons
+        for (int i = perceptrons.Count - Outputs; i < perceptrons.Count; i++)
+        {
+            activePerceptrons.Add(perceptrons[i]);
+        }
+
+        // Propagate backwards to find all perceptrons that lead to outputs
+        bool foundNewActive;
+        do
+        {
+            foundNewActive = false;
+            foreach (var perceptron in perceptrons)
+            {
+                if (activePerceptrons.Contains(perceptron))
+                {
+                    continue;
+                }
+
+                foreach (var connectedPerceptron in perceptron.Weights.Keys)
+                {
+                    if (activePerceptrons.Contains(connectedPerceptron))
+                    {
+                        activePerceptrons.Add(perceptron);
+                        foundNewActive = true;
+                        break;
+                    }
+                }
+            }
+        } while (foundNewActive);
+
+        // Step 2: Remove dead-end perceptrons
+        perceptrons = perceptrons.Where(p => activePerceptrons.Contains(p)).ToList();
+
+        // Optionally: Clean up weights in active perceptrons to remove connections to pruned perceptrons
+        foreach (var perceptron in perceptrons)
+        {
+            List<Perceptron> keysToRemove = perceptron.Weights.Keys.Where(k => !activePerceptrons.Contains(k)).ToList();
+            foreach (var key in keysToRemove)
+            {
+                perceptron.Weights.Remove(key);
             }
         }
     }
+
 
     public float[] Compute(float[] inputArray)
     {
-        if (inputArray.Length != Inputs)
-            throw new ArgumentException("Input array length must match the number of inputs");
-        float[] outputArray = new float[Outputs];
-
-        // Initialize node values dictionary
-        Dictionary<int, float> nodeValues = new Dictionary<int, float>();
-
-        // Initialize input nodes
+        ClearValues();
+        
+        Queue<Perceptron> computeQueue = new Queue<Perceptron>(Inputs);
         for (int i = 0; i < Inputs; i++)
         {
-            nodeValues[i] = inputArray[i];
-        }
-
-        // Process the network
-        for (int layer = 0; layer < Topology.Count; layer++)
-        {
-            for (int nodeIndex = 0; nodeIndex < Topology[layer].Count; nodeIndex++)
+            perceptrons[i].Input(inputArray[i]);
+            
+            foreach (var key in perceptrons[i].Weights.Keys)
             {
-                int currentNode = GetGlobalNodeIndex(layer, nodeIndex);
-                float bias = Topology[layer][nodeIndex].Bias;
-                
-                // Process current node first before passing signal (except input layer)
-                if(layer > 0)
-                    nodeValues[currentNode] = Activation(nodeValues[currentNode] + bias);
-                if (layer == Topology.Count)
-                    break;
-                
-                var currentConnections = Connections[layer][nodeIndex];
-                var currentWeights = Topology[layer][nodeIndex].Weights;
-                for (var i = 0; i < currentConnections.Length; i++)
-                {
-                    var connection = currentConnections[i];
-                    if (!nodeValues.ContainsKey(GetGlobalNodeIndex(connection[0], connection[1])))
-                    {
-                        nodeValues[GetGlobalNodeIndex(connection[0], connection[1])] = 0f;
-                    }
-                    nodeValues[GetGlobalNodeIndex(connection[0], connection[1])] +=
-                        nodeValues[currentNode] * currentWeights[i];
-                }
-                
+                key.Input(InputActivation(perceptrons[i].value));
+                computeQueue.Enqueue(key);
             }
         }
 
-        // Extract output values
+        while (computeQueue.Count > 0)
+        {
+            var head = computeQueue.Dequeue();
+            foreach (var key in head.Weights.Keys)
+            {
+                key.Input(Activation(head.value + head.Bias) * head.Weights[key]);
+                computeQueue.Enqueue(key);
+            }
+        }
+
+        float[] outputArray = new float[Outputs];
         for (int i = 0; i < Outputs; i++)
         {
-            int outputNodeIndex = GetGlobalNodeIndex(Topology.Count - 1, i);
-            outputArray[i] = nodeValues[outputNodeIndex];
+            outputArray[i] = OutputActivation(perceptrons[perceptrons.Count - Outputs + i].value);
         }
 
         return outputArray;
-    }
 
-    // Helper method to get the global index of a node given its layer and local index
-    private int GetGlobalNodeIndex(int layer, int localIndex)
-    {
-        int globalIndex = 0;
-        for (int i = 0; i < layer; i++)
+        void ClearValues()
         {
-            globalIndex += Topology[i].Count;
+            foreach (var perceptron in perceptrons)
+            {
+                perceptron.value = 0f;
+            }
         }
-        globalIndex += localIndex;
-        return globalIndex;
     }
-
 
     public void SaveNetwork(string directory = "")
     {
