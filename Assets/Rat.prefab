@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3558029232657091252}
   - component: {fileID: 464960496414122778}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Triangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.31760997, g: 0.6494387, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -95,11 +95,12 @@ GameObject:
   - component: {fileID: 4458866405068322341}
   - component: {fileID: 1879885693842353686}
   - component: {fileID: 2486405199637500464}
+  - component: {fileID: 2664565947886940713}
   - component: {fileID: 3114879834475311771}
   - component: {fileID: 7685231245164257327}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Rat
-  m_TagString: Untagged
+  m_TagString: Agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -185,11 +186,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 0
+  lifespan: 10
   rayCount: 6
   rayAngle: 12
   rayLength: 12
+  rayLayer:
+    serializedVersion: 2
+    m_Bits: 128
   rotSpeedMultiplier: 60
   speedMultiplier: 5
+  computeTick: 2
+  initializeNn: 1
+  agentObj: {fileID: 8474669843244307403}
+--- !u!114 &2664565947886940713
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8474669843244307403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd2f643c07cb4b246b721e6c13bbf7ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!50 &3114879834475311771
 Rigidbody2D:
   serializedVersion: 4

@@ -14,8 +14,7 @@ public class Visualizer : MonoBehaviour
     public GameObject nodeObj, edgeObj;
     private List<Node> nodes = new List<Node>();
 
-    private Dictionary<NeuralNetwork.Perceptron, Node>
-        nodeDictionary = new Dictionary<NeuralNetwork.Perceptron, Node>();
+    private Dictionary<NeuralNetwork.Perceptron, Node> nodeDictionary = new Dictionary<NeuralNetwork.Perceptron, Node>();
     private List<Edge> edges = new List<Edge>();
     public RectTransform panelTransform;
     
@@ -99,7 +98,6 @@ public class Visualizer : MonoBehaviour
                 edges.Add(edge);
             }
         }
-        
     }
 
     public void Render()
@@ -137,7 +135,7 @@ public class Visualizer : MonoBehaviour
 
         public void Render()
         {
-            var t = perceptron.value >= 1f ? 1f : (perceptron.value < -1f ? 0f : ((perceptron.value + 1f) / 2f));
+            var t = perceptron.Value >= 1f ? 1f : (perceptron.Value < -1f ? 0f : ((perceptron.Value + 1f) / 2f));
             image.color = Color.Lerp(negativeMaxColor, positiveMaxColor, t);
             
             // node size
@@ -216,7 +214,7 @@ public class Visualizer : MonoBehaviour
 
         public void Render()
         {
-            value = origin.perceptron.value;
+            value = origin.perceptron.Value;
             var t = value >= 1f ? 1f : (value < -1f ? 0f : ((value + 1f) / 2f));
             var defaultWidth = 5f;
             var width = Mathf.Abs(t) * defaultWidth;
@@ -268,6 +266,15 @@ public class Visualizer : MonoBehaviour
         // Select closest agent
         var agent = closestCollider.GetComponent<Agent>();
 
+        Deselect(); // Clear current visualization
+
+        Setup(agent.nn);
+
+        targetNeuralNetwok = agent.nn;
+    }
+
+    public void Deselect()
+    {
         // Destroy all edges
         foreach (var edge in edges)
         {
@@ -297,7 +304,5 @@ public class Visualizer : MonoBehaviour
                 Destroy(panelTransform.GetChild(i).gameObject);
             }
         }
-
-        Setup(agent.nn);
     }
 }
