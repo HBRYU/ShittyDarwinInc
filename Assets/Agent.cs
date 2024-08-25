@@ -39,6 +39,7 @@ public class Agent : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         visualizer = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Visualizer>();
+        EntityManager.AddAgent();
     }
 
     // Update is called once per frame
@@ -92,13 +93,13 @@ public class Agent : MonoBehaviour
             if (visualizer.targetNeuralNetwok == nn)
                 visualizer.Deselect();
             
+            EntityManager.DestroyAgent();
             Destroy(gameObject);
         }
 
-        if (health >= 2f)
+        if (health >= 2.5f)
         {
             Reproduce();
-            lifespanTimer -= lifespan;
         }
     }
 
@@ -109,8 +110,13 @@ public class Agent : MonoBehaviour
 
     private void Reproduce()
     {
+        if (!EntityManager.AgentSpawnable())
+            return;
+        
         var mutation = nn.CreateMutation();
         var offspring = Instantiate(agentObj, transform.position, transform.rotation);
         offspring.GetComponent<Agent>().nn = mutation;
+        offspring.name = "Rat";
+        lifespanTimer -= lifespan;
     }
 }

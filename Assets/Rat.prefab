@@ -186,16 +186,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 0
-  lifespan: 10
-  rayCount: 6
-  rayAngle: 12
-  rayLength: 12
+  lifespan: 30
+  rayCount: 12
+  rayAngle: 10
+  rayLength: 16
   rayLayer:
     serializedVersion: 2
     m_Bits: 128
-  rotSpeedMultiplier: 60
+  rotSpeedMultiplier: 120
   speedMultiplier: 5
-  computeTick: 2
+  computeTick: 3
   initializeNn: 1
   agentObj: {fileID: 8474669843244307403}
 --- !u!114 &2664565947886940713

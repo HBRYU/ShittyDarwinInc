@@ -178,7 +178,17 @@ public class NeuralNetwork
         Queue<Perceptron> computeQueue = new Queue<Perceptron>(Inputs);
         for (int i = 0; i < Inputs; i++)
         {
-            perceptrons[i].Input(inputArray[i]);
+            try
+            {
+                perceptrons[i].Input(inputArray[i]);
+            }
+            catch (IndexOutOfRangeException e)
+            {
+                Debug.LogError(e);
+                Debug.LogWarning(perceptrons.Count);
+                Debug.LogWarning(inputArray.Length);
+                Debug.LogWarning(i);
+            }
             
             foreach (var key in perceptrons[i].Weights.Keys)
             {
@@ -248,14 +258,14 @@ public class NeuralNetwork
             foreach (var key in perceptron.Weights.Keys.ToList())  // Using ToList() to avoid modifying the collection during iteration
             {
                 // #1. Weight mutation
-                float weightMutationChance = 0.1f;
+                float weightMutationChance = 0.01f;
                 if (Random.value < weightMutationChance)
                 {
-                    perceptron.Weights[key] = PolynomialRandom() * 2f;
+                    perceptron.Weights[key] += PolynomialRandom();
                 }
 
                 // #2. Sever connection mutation
-                float severConnectionChance = 0.05f;
+                float severConnectionChance = 0.01f;
                 if (Random.value < severConnectionChance && perceptron.Weights.Count > 1)
                 {
                     perceptron.Weights.Remove(key);
@@ -263,14 +273,14 @@ public class NeuralNetwork
             }
 
             // #3. Bias mutation
-            float biasMutationChance = 0.1f;
+            float biasMutationChance = 0.01f;
             if (Random.value < biasMutationChance)
             {
-                perceptron.Bias = PolynomialRandom() * 2f;
+                perceptron.Bias += PolynomialRandom();
             }
 
             // #4. Add connection mutation
-            float addConnectionChance = 0.05f;
+            float addConnectionChance = 0.01f;
             if (Random.value < addConnectionChance)
             {
                 var potentialConnections = mutation.perceptrons.Except(perceptron.Weights.Keys).Except(new[] { perceptron }).ToList();
@@ -283,14 +293,14 @@ public class NeuralNetwork
         }
 
         // #5. Add new hidden perceptron (+ connections) mutation
-        float addPerceptronChance = 0.02f;
+        float addPerceptronChance = 0.005f;
         if (Random.value < addPerceptronChance)
         {
             AddNewHiddenPerceptron(mutation);
         }
 
         // #6. Destroy hidden perceptron mutation
-        float destroyPerceptronChance = 0.02f;
+        float destroyPerceptronChance = 0.005f;
         if (Random.value < destroyPerceptronChance)
         {
             DestroyRandomHiddenPerceptron(mutation);
