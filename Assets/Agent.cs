@@ -22,6 +22,8 @@ public class Agent : MonoBehaviour
     public GameObject agentObj;
 
     private Visualizer visualizer;
+
+    public float weightCostLifeReductionCoeff, mobilityLifeReductionCoeff;
     
     // Start is called before the first frame update
     void Start()
@@ -87,6 +89,9 @@ public class Agent : MonoBehaviour
     private void HandleHealth()
     {
         lifespanTimer -= Time.fixedDeltaTime;
+        lifespanTimer -= Time.fixedDeltaTime * rb.velocity.sqrMagnitude * mobilityLifeReductionCoeff;
+        lifespanTimer -= Time.fixedDeltaTime * weightCostLifeReductionCoeff * nn.WeightCost;
+        
         health = lifespanTimer / lifespan;
         if (health <= 0f)
         {
@@ -97,7 +102,7 @@ public class Agent : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (health >= 2.5f)
+        if (health >= 2.25f)
         {
             Reproduce();
         }
@@ -116,6 +121,7 @@ public class Agent : MonoBehaviour
         var mutation = nn.CreateMutation();
         var offspring = Instantiate(agentObj, transform.position, transform.rotation);
         offspring.GetComponent<Agent>().nn = mutation;
+        offspring.GetComponent<Agent>().initializeNn = false;
         offspring.name = "Rat";
         lifespanTimer -= lifespan;
     }

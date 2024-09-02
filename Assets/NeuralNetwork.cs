@@ -70,10 +70,16 @@ public class NeuralNetwork
     }
     public readonly NetworkType Type;
     public readonly int Inputs, Outputs;
-    public readonly Func<float, float> Activation = (x) => Mathf.Max(0f, x);  // ReLU
+    //public readonly Func<float, float> Activation = (x) => Mathf.Max(0f, x);  // ReLU
+    public readonly Func<float, float> Activation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
     public readonly Func<float, float> InputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
     public readonly Func<float, float> OutputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
+
+    private static float connectionMutationChance = 0.005f;
+    private static float perceptronMutationChance = 0.01f;
     
+    public int WeightCost { get; private set; }
+
     public List<Perceptron> perceptrons = new List<Perceptron>();
 
     public NeuralNetwork(string name, NetworkType type, int inputs, int outputs)
@@ -118,6 +124,7 @@ public class NeuralNetwork
         }
 
         PruneDeadEndPerceptrons();
+        SetWeightCost();
     }
     
     
@@ -170,11 +177,20 @@ public class NeuralNetwork
         }
     }
 
+    void SetWeightCost()
+    {
+        WeightCost = 0;
+        foreach (var perceptron in perceptrons)
+        {
+            WeightCost += perceptron.Weights.Count;
+        }
+    }
+
 
     public float[] Compute(float[] inputArray)
     {
         ClearValues();
-        
+    
         Queue<Perceptron> computeQueue = new Queue<Perceptron>(Inputs);
         for (int i = 0; i < Inputs; i++)
         {
@@ -189,7 +205,7 @@ public class NeuralNetwork
                 Debug.LogWarning(inputArray.Length);
                 Debug.LogWarning(i);
             }
-            
+        
             foreach (var key in perceptrons[i].Weights.Keys)
             {
                 key.Input(InputActivation(perceptrons[i].Value));
@@ -223,6 +239,7 @@ public class NeuralNetwork
             }
         }
     }
+
 
     public NeuralNetwork CreateMutation()
     {
@@ -258,14 +275,14 @@ public class NeuralNetwork
             foreach (var key in perceptron.Weights.Keys.ToList())  // Using ToList() to avoid modifying the collection during iteration
             {
                 // #1. Weight mutation
-                float weightMutationChance = 0.01f;
+                float weightMutationChance = connectionMutationChance;
                 if (Random.value < weightMutationChance)
                 {
                     perceptron.Weights[key] += PolynomialRandom();
                 }
 
                 // #2. Sever connection mutation
-                float severConnectionChance = 0.01f;
+                float severConnectionChance = connectionMutationChance;
                 if (Random.value < severConnectionChance && perceptron.Weights.Count > 1)
                 {
                     perceptron.Weights.Remove(key);
@@ -273,17 +290,18 @@ public class NeuralNetwork
             }
 
             // #3. Bias mutation
-            float biasMutationChance = 0.01f;
+            float biasMutationChance = perceptronMutationChance;
             if (Random.value < biasMutationChance)
             {
                 perceptron.Bias += PolynomialRandom();
             }
 
             // #4. Add connection mutation
-            float addConnectionChance = 0.01f;
+            float addConnectionChance = perceptronMutationChance;
             if (Random.value < addConnectionChance)
             {
-                var potentialConnections = mutation.perceptrons.Except(perceptron.Weights.Keys).Except(new[] { perceptron }).ToList();
+                var thisIndex = mutation.perceptrons.IndexOf(perceptron);
+                var potentialConnections = mutation.perceptrons.GetRange(thisIndex + 1, perceptrons.Count - thisIndex - 1).ToList();
                 if (potentialConnections.Count > 0)
                 {
                     var newConnection = potentialConnections[Random.Range(0, potentialConnections.Count)];
@@ -293,14 +311,14 @@ public class NeuralNetwork
         }
 
         // #5. Add new hidden perceptron (+ connections) mutation
-        float addPerceptronChance = 0.005f;
+        float addPerceptronChance = perceptronMutationChance;
         if (Random.value < addPerceptronChance)
         {
             AddNewHiddenPerceptron(mutation);
         }
 
         // #6. Destroy hidden perceptron mutation
-        float destroyPerceptronChance = 0.005f;
+        float destroyPerceptronChance = perceptronMutationChance;
         if (Random.value < destroyPerceptronChance)
         {
             DestroyRandomHiddenPerceptron(mutation);
@@ -315,21 +333,22 @@ public class NeuralNetwork
     private void AddNewHiddenPerceptron(NeuralNetwork network)
     {
         var newPerceptron = new Perceptron(PolynomialRandom());
-        network.perceptrons.Insert(network.perceptrons.Count - Outputs, newPerceptron);  // Insert before output perceptrons
-
+        network.perceptrons.Insert(UnityEngine.Random.Range(Inputs, network.perceptrons.Count - Outputs), newPerceptron);  // Insert before output perceptrons
+        var newIndex = network.perceptrons.IndexOf(newPerceptron);
+        
         // Add random connections from existing perceptrons to the new one
-        foreach (var perceptron in network.perceptrons)
+        foreach (var perceptron in network.perceptrons.GetRange(0, newIndex))
         {
-            if (Random.value < 0.5f && perceptron != newPerceptron)
+            if (Random.value < perceptronMutationChance && perceptron != newPerceptron)
             {
                 perceptron.AddConnection(newPerceptron, PolynomialRandom() * 2f);
             }
         }
 
         // Add random connections from the new perceptron to existing perceptrons
-        foreach (var perceptron in network.perceptrons)
+        foreach (var perceptron in network.perceptrons.GetRange(newIndex + 1, perceptrons.Count - newIndex - 1))
         {
-            if (Random.value < 0.5f && perceptron != newPerceptron)
+            if (Random.value < perceptronMutationChance && perceptron != newPerceptron)
             {
                 newPerceptron.AddConnection(perceptron, PolynomialRandom() * 2f);
             }

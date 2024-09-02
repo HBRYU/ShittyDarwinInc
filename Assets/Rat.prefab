@@ -198,6 +198,8 @@ MonoBehaviour:
   computeTick: 3
   initializeNn: 1
   agentObj: {fileID: 8474669843244307403}
+  weightCostLifeReductionCoeff: 0.01
+  mobilityLifeReductionCoeff: 0.02
 --- !u!114 &2664565947886940713
 MonoBehaviour:
   m_ObjectHideFlags: 0
