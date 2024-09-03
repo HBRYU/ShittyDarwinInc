@@ -8,6 +8,7 @@ TagManager:
   - Agent
   - Canvas
   - Food
+  - Bug
   layers:
   - Default
   - TransparentFX

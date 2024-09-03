@@ -80,7 +80,7 @@ public class Agent : MonoBehaviour
             var direction = new Vector2(Mathf.Cos(theta), Mathf.Sin(theta));
             RaycastHit2D hit = Physics2D.Raycast((Vector2)transform.position + direction * 0.3f, direction, rayLength, rayLayer); // To ignore self collision
             Debug.DrawRay((Vector2)transform.position + direction * 0.3f, direction);
-            output[i] = hit.collider ? hit.distance : -1f;
+            output[i] = hit.collider ? hit.distance / rayLength : -1f;
         }
 
         return output;

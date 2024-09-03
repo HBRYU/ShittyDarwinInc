@@ -189,7 +189,7 @@ MonoBehaviour:
   lifespan: 30
   rayCount: 12
   rayAngle: 10
-  rayLength: 16
+  rayLength: 20
   rayLayer:
     serializedVersion: 2
     m_Bits: 128
