@@ -7,7 +7,7 @@ using Random = UnityEngine.Random;
 
 public class EntityManager : MonoBehaviour
 {
-    public static int AgentGlobalCapacity = 256;
+    public static int AgentGlobalCapacity = 150, BugGlobalCapacity = 200;
     public static int AgentCount = 0, BugCount = 0;
     public GameObject agentObj, bugObj;
 

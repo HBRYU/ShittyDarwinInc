@@ -27,7 +27,7 @@ public class Bug : MonoBehaviour
     void FixedUpdate()
     {
         splitTimer -= Time.fixedDeltaTime;
-        if (splitTimer <= 0f && EntityManager.BugCount < 100)
+        if (splitTimer <= 0f && EntityManager.BugCount < EntityManager.BugGlobalCapacity)
         {
             splitTimer = splitTime;
             Instantiate(gameObject, transform.position, quaternion.identity);

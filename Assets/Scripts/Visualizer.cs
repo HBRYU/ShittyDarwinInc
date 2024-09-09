@@ -17,11 +17,13 @@ public class Visualizer : MonoBehaviour
     private Dictionary<NeuralNetwork.Perceptron, Node> nodeDictionary = new Dictionary<NeuralNetwork.Perceptron, Node>();
     private List<Edge> edges = new List<Edge>();
     public RectTransform panelTransform;
+
+    public LayerMask agentLayer;
     
     // Start is called before the first frame update
     void Start()
     {
-        Setup(sampleTarget.GetComponent<Agent>().nn);
+        Setup(sampleTarget.GetComponent<ShooterBehaviour>().nn);
     }
 
     // Update is called once per frame
@@ -246,7 +248,7 @@ public class Visualizer : MonoBehaviour
             return;
 
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var col = Physics2D.OverlapCircleAll(mousePosition, 2f);
+        var col = Physics2D.OverlapCircleAll(mousePosition, 2f, agentLayer);
 
         if (col.Length == 0)
             return;
@@ -264,7 +266,7 @@ public class Visualizer : MonoBehaviour
         }
 
         // Select closest agent
-        var agent = closestCollider.GetComponent<Agent>();
+        var agent = closestCollider.GetComponent<ShooterBehaviour>();
 
         Deselect(); // Clear current visualization
 

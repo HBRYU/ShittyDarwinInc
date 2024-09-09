@@ -9,6 +9,7 @@ TagManager:
   - Canvas
   - Food
   - Bug
+  - ShooterAgent
   layers:
   - Default
   - TransparentFX
@@ -16,13 +17,13 @@ TagManager:
   - 
   - Water
   - UI
-  - Agent1
+  - Agent
   - Food
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Bullet
+  - Agent0
+  - Agent1
+  - Bullet0
+  - Bullet1
   - 
   - 
   - 

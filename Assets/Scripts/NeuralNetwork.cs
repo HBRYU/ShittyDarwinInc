@@ -70,13 +70,14 @@ public class NeuralNetwork
     }
     public readonly NetworkType Type;
     public readonly int Inputs, Outputs;
+    
     //public readonly Func<float, float> Activation = (x) => Mathf.Max(0f, x);  // ReLU
     public readonly Func<float, float> Activation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
     public readonly Func<float, float> InputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
     public readonly Func<float, float> OutputActivation = (x) => 1.0f / (1.0f + (float)Math.Exp(-x));  // Sigmoid
 
-    private static float connectionMutationChance = 0.005f;
-    private static float perceptronMutationChance = 0.01f;
+    private static float connectionMutationChance = 0.02f;
+    private static float perceptronMutationChance = 0.03f;
     
     public int WeightCost { get; private set; }
 
@@ -138,6 +139,12 @@ public class NeuralNetwork
         {
             activePerceptrons.Add(perceptrons[i]);
         }
+        
+        // Add all input perceptrons
+        for (int i = 0; i < Inputs; i++)
+        {
+            activePerceptrons.Add(perceptrons[i]);
+        }
 
         // Propagate backwards to find all perceptrons that lead to outputs
         bool foundNewActive;
@@ -194,17 +201,9 @@ public class NeuralNetwork
         Queue<Perceptron> computeQueue = new Queue<Perceptron>(Inputs);
         for (int i = 0; i < Inputs; i++)
         {
-            try
-            {
-                perceptrons[i].Input(inputArray[i]);
-            }
-            catch (IndexOutOfRangeException e)
-            {
-                Debug.LogError(e);
-                Debug.LogWarning(perceptrons.Count);
-                Debug.LogWarning(inputArray.Length);
-                Debug.LogWarning(i);
-            }
+            if(perceptrons.Count < Inputs)
+                Debug.Log(perceptrons.Count);
+            perceptrons[i].Input(inputArray[i]);
         
             foreach (var key in perceptrons[i].Weights.Keys)
             {
@@ -215,11 +214,16 @@ public class NeuralNetwork
 
         while (computeQueue.Count > 0)
         {
+            var keys = new HashSet<Perceptron>();
             var head = computeQueue.Dequeue();
             foreach (var key in head.Weights.Keys)
             {
                 key.Input(Activation(head.Value + head.Bias) * head.Weights[key]);
-                computeQueue.Enqueue(key);
+                if (!keys.Contains(key))
+                {
+                    computeQueue.Enqueue(key);
+                    keys.Add(key);
+                }
             }
         }
 
@@ -333,7 +337,7 @@ public class NeuralNetwork
     private void AddNewHiddenPerceptron(NeuralNetwork network)
     {
         var newPerceptron = new Perceptron(PolynomialRandom());
-        network.perceptrons.Insert(UnityEngine.Random.Range(Inputs, network.perceptrons.Count - Outputs), newPerceptron);  // Insert before output perceptrons
+        network.perceptrons.Insert(Random.Range(Inputs, network.perceptrons.Count - Outputs), newPerceptron);  // Insert before output perceptrons
         var newIndex = network.perceptrons.IndexOf(newPerceptron);
         
         // Add random connections from existing perceptrons to the new one

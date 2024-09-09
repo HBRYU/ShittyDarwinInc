@@ -5977,7 +5977,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c808c10ac7e73914993a10b9e57858e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  globalLimit: 0
+  globalLimit: 100
   foodObj: {fileID: 872219154568319153, guid: 1bdd5137d1208e24396f354b81ae5ca8, type: 3}
 --- !u!114 &1729356025
 MonoBehaviour:
