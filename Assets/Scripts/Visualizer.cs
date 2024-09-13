@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -19,11 +20,15 @@ public class Visualizer : MonoBehaviour
     public RectTransform panelTransform;
 
     public LayerMask agentLayer;
+
+    public bool useGenerationPanel = true;
+    public TextMeshProUGUI generation;
     
     // Start is called before the first frame update
     void Start()
     {
         Setup(sampleTarget.GetComponent<ShooterBehaviour>().nn);
+        generation.gameObject.SetActive(useGenerationPanel);
     }
 
     // Update is called once per frame

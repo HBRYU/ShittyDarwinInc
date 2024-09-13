@@ -1,40 +1,72 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class WarManager : MonoBehaviour
 {
-    public static int[] TeamSurvivors = new int[2];
+    public static Dictionary<int, int> TeamSurvivors = new Dictionary<int, int>();
     public Color[] teamColors;
     public GameObject agentObj;
-    public int teamCount, startingAgentsPerTeam = 16, endGameOnTeamAgentCount = 4;
+    public int teamCount, startingAgentsPerTeam = 16, endGameOnTeamAgentCount = 4, mutantsPerTeam = 4;
     public Transform[] spawnAreas;
+
+    private Visualizer _visualizer;
+    private int generation = 1;
+    private TextMeshProUGUI generationText;
     
-    // Start is called before the first frame update
     private void Awake()
     {
-        TeamSurvivors[0] = 0;
-        TeamSurvivors[1] = 0;
+        TeamSurvivors[LayerMask.NameToLayer("Agent0")] = 0;
+        TeamSurvivors[LayerMask.NameToLayer("Agent1")] = 0;
     }
 
-    // Update is called once per frame
+    void Start()
+    {
+        _visualizer = GameObject.FindGameObjectWithTag("Canvas").GetComponent<Visualizer>();
+        generationText = _visualizer.generation;
+        generationText.text = "Generation " + generation;
+        StartGame();
+    }
+    
     void FixedUpdate()
     {
-        TeamSurvivors = new int[2];
+        TeamSurvivors = new Dictionary<int, int>();
+        TeamSurvivors[LayerMask.NameToLayer("Agent0")] = 0;
+        TeamSurvivors[LayerMask.NameToLayer("Agent1")] = 0;
+        
         foreach (var obj in GameObject.FindGameObjectsWithTag("ShooterAgent"))
         {
-            TeamSurvivors[obj.GetComponent<ShooterBehaviour>().team]++;
+            TeamSurvivors[obj.layer]++;
         }
 
         foreach (var survivors in TeamSurvivors)
         {
-            if (survivors <= endGameOnTeamAgentCount)
+            if (survivors.Value <= endGameOnTeamAgentCount)
             {
                 EndGame();
+            }
+        }
+    }
+
+    void StartGame()
+    {
+        for (int team = 0; team < teamCount; team++)
+        {
+            for (int i = 0; i < startingAgentsPerTeam; i++)
+            {
+                var spawnPoint = spawnAreas[team].position;
+                spawnPoint.x += Random.Range(-spawnAreas[team].localScale.x, spawnAreas[team].localScale.x) * 0.5F;
+                spawnPoint.y += Random.Range(-spawnAreas[team].localScale.y, spawnAreas[team].localScale.y) * 0.5f;
+                var agent = Instantiate(agentObj, spawnPoint, quaternion.identity);
+                agent.GetComponent<ShooterBehaviour>().team = team;
+                agent.GetComponent<SpriteRenderer>().color = teamColors[team];
             }
         }
     }
@@ -45,6 +77,8 @@ public class WarManager : MonoBehaviour
         //print(TeamSurvivors[0]);
         //print(TeamSurvivors[1]);
         
+        generationText.text = "Generation " + ++generation;
+        
         var survivors = GameObject.FindGameObjectsWithTag("ShooterAgent");
         var nns = new NeuralNetwork[survivors.Length];
         var scores = new float[survivors.Length];
@@ -54,15 +88,16 @@ public class WarManager : MonoBehaviour
         {
             var behaviour = survivors[i].GetComponent<ShooterBehaviour>();
             nns[i] = behaviour.nn;
-            scores[i] = behaviour.score;  // Spaghetti
+            scores[i] = Mathf.Pow(behaviour.score * 10, 2) + behaviour.health;  // Spaghetti
             scoreSum += scores[i];
         }
 
 
         var offspringNns = new NeuralNetwork[teamCount * startingAgentsPerTeam];
+        var indexes = new List<int>(teamCount * startingAgentsPerTeam);
         
         for (int i = 0; i < teamCount * startingAgentsPerTeam; i++)
-        {
+        {   
             NeuralNetwork parent = nns[0];
             float s = 0f, x = Random.Range(0, scoreSum);
             for (int j = 0; j < scores.Length; j++)
@@ -76,18 +111,23 @@ public class WarManager : MonoBehaviour
             }
 
             offspringNns[i] = parent.CreateMutation();
+            if (i >= teamCount * (startingAgentsPerTeam - mutantsPerTeam))
+                offspringNns[i].Initialize();
+            indexes.Add(i);
         }
 
-        for (int i = 0; i < survivors.Length; i++)
+        foreach (var s in survivors)
         {
-            survivors[i].GetComponent<ShooterBehaviour>().Die();
+            s.GetComponent<ShooterBehaviour>().Die();
         }
 
         for (int team = 0; team < teamCount; team++)
         {
             for (int i = 0; i < startingAgentsPerTeam; i++)
             {
-                var nn = offspringNns[team * startingAgentsPerTeam + i];
+                var index = indexes[Random.Range(0, indexes.Count)];
+                indexes.Remove(index);
+                var nn = offspringNns[index];
                 var spawnPoint = spawnAreas[team].position;
                 spawnPoint.x += Random.Range(-spawnAreas[team].localScale.x, spawnAreas[team].localScale.x) * 0.5F;
                 spawnPoint.y += Random.Range(-spawnAreas[team].localScale.y, spawnAreas[team].localScale.y) * 0.5f;

@@ -14,9 +14,11 @@ public class GameSpeedController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.A))
-            Time.timeScale += Input.GetAxisRaw("Horizontal") * timeScaleDelta;
-        if (Input.GetKeyDown(KeyCode.S))
+        if(Input.GetKeyDown(KeyCode.E))
+            Time.timeScale += timeScaleDelta;
+        if(Input.GetKeyDown(KeyCode.Q))
+            Time.timeScale -= timeScaleDelta;
+        if (Input.GetKeyDown(KeyCode.T))
             Time.timeScale = 1f;
     }
 }

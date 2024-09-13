@@ -198,26 +198,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   team: 0
-  maxHealth: 100
-  health: 100
-  lifespan: 30
+  maxHealth: 120
+  health: 120
+  lifespan: 60
   score: 0
-  ammo: 20
+  ammo: 40
   reloadTime: 1
   bulletObj: {fileID: 8981172597261433162, guid: ee228cb0d194cbc4ca12773fd04263e3, type: 3}
-  rayCount: 8
-  rayAngle: 8
-  rayLength: 30
+  rayCount: 10
+  rayAngle: 6
+  rayLength: 40
   rayLayer:
     serializedVersion: 2
     m_Bits: 7680
   rotSpeedMultiplier: 120
   speedMultiplier: 5
-  computeTick: 8
+  computeTick: 4
   initializeNn: 1
   agentObj: {fileID: 3579972241746098429}
-  weightCostLifeReductionCoeff: 0.001
-  mobilityLifeReductionCoeff: 0.002
+  weightCostLifeReductionCoeff: 0
+  mobilityLifeReductionCoeff: 0
+  registerSize: 2
 --- !u!58 &5675158794012443059
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -252,7 +253,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 0.75
 --- !u!50 &3881380824771700648
 Rigidbody2D:
   serializedVersion: 4
@@ -261,7 +262,7 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3579972241746098429}
-  m_BodyType: 0
+  m_BodyType: 1
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0

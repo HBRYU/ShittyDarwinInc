@@ -7,9 +7,11 @@ public class BulletBehaviour : MonoBehaviour
 {
     public int team;
     public float damage, lifeSpan;
+    [HideInInspector] public float lifeSpanTimer;
     public SpriteRenderer sprite;
 
-    private bool collided = false;
+    [HideInInspector]
+    public bool collided = false;
 
     public Collider2D Collider;
     public Collider2D ParentCollider;
@@ -20,16 +22,24 @@ public class BulletBehaviour : MonoBehaviour
     
     private void Start()
     {
+        Initialize();
+    }
+
+    public void Initialize()
+    {
         Physics2D.IgnoreCollision(Collider, ParentCollider);
         rb = GetComponent<Rigidbody2D>();
+        lifeSpanTimer = lifeSpan;
     }
 
     private void FixedUpdate()
     {
         rb.velocity = transform.right * speed;
-        lifeSpan -= Time.fixedDeltaTime;
-        if(lifeSpan < 0f || !ParentCollider)
-            Destroy(gameObject);
+        lifeSpanTimer -= Time.fixedDeltaTime;
+        if (lifeSpanTimer < 0f || !ParentCollider)
+        {
+            Despawn();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -37,18 +47,27 @@ public class BulletBehaviour : MonoBehaviour
         if (other.CompareTag("ShooterAgent") && !collided && other != ParentCollider)
         {
             var behaviour = other.GetComponent<ShooterBehaviour>();
-            if (ParentCollider && behaviour.team == team)
-            {
-                Destroy(gameObject);
-                collided = true;
-                return;
-            }
-            
-            behaviour.TakeDamage(damage);
+            bool enemyDead = behaviour.TakeDamage(damage);
             collided = true;
-            if(ParentCollider)
-                ParentCollider.GetComponent<ShooterBehaviour>().health += damage;
-            Destroy(gameObject);
+            if (ParentCollider)
+            {
+                var parentBehaviour = ParentCollider.GetComponent<ShooterBehaviour>();
+                parentBehaviour.health += damage;
+                parentBehaviour.score += enemyDead ? 3f : 1f;
+                Physics2D.IgnoreCollision(Collider, ParentCollider, false);
+            }
+            Despawn();
         }
+    }
+
+    public void ResetLifeSpan()
+    {
+        lifeSpanTimer = lifeSpan;
+    }
+
+    void Despawn()
+    {
+        gameObject.SetActive(false);
+        BulletPool.Despawn();
     }
 }

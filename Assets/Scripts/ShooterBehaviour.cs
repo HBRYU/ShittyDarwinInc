@@ -7,7 +7,7 @@ public class ShooterBehaviour : MonoBehaviour
 {
     public int team;
     public float maxHealth, health, lifespan;
-    public float score;
+    public float score = 1f;
     public int ammo;
     public float reloadTime;
     private float reloadTimer;
@@ -33,19 +33,23 @@ public class ShooterBehaviour : MonoBehaviour
 
     private Color color;
 
-    private float[] prevOutput;
+    private float[] register;
+    public int registerSize = 3;
+
+    private BulletPool _bulletPool;
+    private Collider2D _collider2D;
     
     // Start is called before the first frame update
     void Start()
     {
-        health = maxHealth;
+        health = maxHealth + Random.Range(-1f, 1f);
         color = GetComponent<SpriteRenderer>().color;
         gameObject.layer = LayerMask.NameToLayer("Agent" + team);
         
-        int outputCount = 3;  // direction + speed + fire gun
-        int inputCount = rayCount * 2 + outputCount;  // rays w/ type + health + ammo + previous output
+        int outputCount = 4 + registerSize;  // direction + speed + lr speed + fire gun + register
+        int inputCount = rayCount * 2 + registerSize;  // rays w/ type + health + ammo + register
 
-        prevOutput = new float[outputCount];
+        register = new float[registerSize];
 
         if (initializeNn)
         {
@@ -62,6 +66,11 @@ public class ShooterBehaviour : MonoBehaviour
 
         RemoveLayerFromMask(ref rayLayer, LayerMask.NameToLayer("Agent" + team));
         RemoveLayerFromMask(ref rayLayer, LayerMask.NameToLayer("Bullet" + team));
+
+        score = score <= 0f ? 0.2f : score;
+        
+        _bulletPool = GameObject.FindGameObjectWithTag("GM").GetComponent<BulletPool>();
+        _collider2D = GetComponent<CircleCollider2D>();
     }
     
     void RemoveLayerFromMask(ref LayerMask mask, int layer)
@@ -89,25 +98,23 @@ public class ShooterBehaviour : MonoBehaviour
 
         computeTickCounter = 1;
         float[] rayInputs = HandleRayCast();
-        var inputArray = rayInputs.Concat(new float[] { health, ammo }).ToArray().Concat(prevOutput).ToArray();
+        var inputArray = rayInputs.Concat(new float[] { health, ammo }).ToArray().Concat(register).ToArray();
         var outputArray = nn.Compute(inputArray);
         var rotationalVelocity = outputArray[0] * 2f - 1f;  // -1 ~ 1
         var forwardVelocity = outputArray[1] * 2f - 1f;  // -1 ~ 1
-        bool fire = outputArray[2] >= 0f;
+        var lrVelocity = outputArray[2] * 2f - 1f;
+        bool fire = outputArray[3] >= 0f;
         
         rb.angularVelocity = rotationalVelocity * rotSpeedMultiplier;
-        var eulerAngles = transform.eulerAngles;
-        rb.velocity = new Vector2(Mathf.Cos(eulerAngles.z * Mathf.Deg2Rad), Mathf.Sin(eulerAngles.z * Mathf.Deg2Rad)) * (forwardVelocity * speedMultiplier);
+        rb.velocity = (transform.right * forwardVelocity + transform.up * lrVelocity) * speedMultiplier;
 
         if(fire)
             HandleGun();
 
-        for (int i = 0; i < outputArray.Length; i++)
+        for (int i = outputArray.Length - registerSize; i < outputArray.Length; i++)
         {
-            prevOutput[i] = outputArray[i];
+            register[i - (outputArray.Length - registerSize)] = outputArray[i];
         }
-
-        
     }
     
     private float[] HandleRayCast()
@@ -132,7 +139,7 @@ public class ShooterBehaviour : MonoBehaviour
         
         health -= maxHealth * reduction / lifespan;
 
-        score = health;  // Temporary
+        //score = health;  // Temporary
         
         if (health <= 0f)
         {
@@ -140,9 +147,10 @@ public class ShooterBehaviour : MonoBehaviour
         }
     }
 
-    public void TakeDamage(float damage)
+    public bool TakeDamage(float damage)
     {
         health -= damage;
+        return health <= 0f;
     }
 
     public void Die()
@@ -163,7 +171,7 @@ public class ShooterBehaviour : MonoBehaviour
 
         reloadTimer = reloadTime;
         ammo--;
-        var bullet = Instantiate(bulletObj, transform.position, transform.rotation);
+        /*var bullet = Instantiate(bulletObj, transform.position, transform.rotation);
         bullet.layer = LayerMask.NameToLayer("Bullet" + team);
         bullet.transform.GetChild(0).gameObject.layer = LayerMask.NameToLayer("Bullet" + team);
         //print("Bullet instantiated");
@@ -171,6 +179,9 @@ public class ShooterBehaviour : MonoBehaviour
         behaviour.team = team;
         behaviour.sprite.color = color;
         behaviour.ParentCollider = GetComponent<CircleCollider2D>();
+        */
         //bullet.GetComponent<Rigidbody2D>().velocity = bullet.transform.forward * 10f;
+        
+        _bulletPool.SpawnBullet(transform.position, transform.rotation, _collider2D, team, color);
     }
 }
