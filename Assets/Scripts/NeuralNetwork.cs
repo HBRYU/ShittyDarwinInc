@@ -200,6 +200,49 @@ public class NeuralNetwork
     }
 
 
+    public void Compute(float[] inputArray, ref float[] refOutputArray)
+    {
+        ClearValues();
+        for (int i = 0; i < Inputs; i++)
+        {
+            perceptrons[i].Input(inputArray[i]);
+            
+            foreach (var key in perceptrons[i].Weights.Keys)
+            {
+                key.Input(InputActivation(perceptrons[i].Value));
+                computeList.Add(key);
+            }
+        }
+
+        while (computeList.Count > 0)
+        {
+            var head = computeList[0];
+            computeList.RemoveAt(0);
+            foreach (var key in head.Weights.Keys)
+            {
+                key.Input(Activation(head.Value + head.Bias) * head.Weights[key]);
+                if (!computeList.Contains(key))
+                {
+                    computeList.Add(key);
+                }
+            }
+        }
+
+        
+        for (int i = 0; i < Outputs; i++)
+        {
+            refOutputArray[i] = OutputActivation(perceptrons[perceptrons.Count - Outputs + i].Value);
+        }
+
+        void ClearValues()
+        {
+            foreach (var perceptron in perceptrons)
+            {
+                perceptron.Value = 0f;
+            }
+        }
+    }
+    
     public float[] Compute(float[] inputArray)
     {
         ClearValues();

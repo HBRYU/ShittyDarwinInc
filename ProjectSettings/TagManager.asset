@@ -11,6 +11,7 @@ TagManager:
   - Bug
   - ShooterAgent
   - GM
+  - Drone
   layers:
   - Default
   - TransparentFX

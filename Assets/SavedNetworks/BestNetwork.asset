@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bdae39efff9e398429be65a8079cf33c, type: 3}
+  m_Name: BestNetwork
+  m_EditorClassIdentifier: 
+  Name: Drone
+  Type: 1
+  Inputs: 6
+  Outputs: 4
+  Perceptrons:
+  - Bias: 0.755353
+    ConnectedPerceptronIndices: 08000000
+    Weights:
+    - 0.011807373
+  - Bias: 0.37369093
+    ConnectedPerceptronIndices: 0a000000
+    Weights:
+    - -0.045724303
+  - Bias: -0.0442619
+    ConnectedPerceptronIndices: 080000000a0000000b000000
+    Weights:
+    - -0.020390084
+    - 0.02686561
+    - -1.48563
+  - Bias: -0.8845256
+    ConnectedPerceptronIndices: 060000000b000000
+    Weights:
+    - -0.033594638
+    - 1.3118831
+  - Bias: 0.016561313
+    ConnectedPerceptronIndices: 0700000008000000090000000a000000
+    Weights:
+    - -0.27084616
+    - 1.7911656
+    - 0.69113684
+    - 0.00023416844
+  - Bias: 0.078143336
+    ConnectedPerceptronIndices: 090000000a0000000b000000
+    Weights:
+    - -0.7114337
+    - 0.038755875
+    - -1.4865537
+  - Bias: 0.6327452
+    ConnectedPerceptronIndices: 0a0000000b000000
+    Weights:
+    - 0.5789019
+    - -0.053728584
+  - Bias: 0.288967
+    ConnectedPerceptronIndices: 0a000000
+    Weights:
+    - -0.0028457972
+  - Bias: 0.034460444
+    ConnectedPerceptronIndices: 
+    Weights: []
+  - Bias: -0.07342039
+    ConnectedPerceptronIndices: 
+    Weights: []
+  - Bias: -0.89188033
+    ConnectedPerceptronIndices: 
+    Weights: []
+  - Bias: 0.1882751
+    ConnectedPerceptronIndices: 
+    Weights: []

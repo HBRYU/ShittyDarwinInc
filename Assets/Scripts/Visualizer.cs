@@ -27,7 +27,7 @@ public class Visualizer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Setup(sampleTarget.GetComponent<ShooterBehaviour>().nn);
+        Setup(sampleTarget.GetComponent<DroneBehaviour>().nn);
         generation.gameObject.SetActive(useGenerationPanel);
     }
 
@@ -42,7 +42,7 @@ public class Visualizer : MonoBehaviour
         HandleAgentSelection();
     }
 
-    void Setup(NeuralNetwork neuralNetwork)
+    public void Setup(NeuralNetwork neuralNetwork)
     {
         int inputs = neuralNetwork.Inputs, outputs = neuralNetwork.Outputs;
         float nodeScale = topRight.y * 2f / inputs;
@@ -61,7 +61,7 @@ public class Visualizer : MonoBehaviour
             var obj = Instantiate(this.nodeObj, panelTransform);
             obj.GetComponent<RectTransform>().sizeDelta = new Vector2(imageSize, imageSize);
             obj.GetComponent<RectTransform>().anchoredPosition = new Vector2(-topRight.x, y);
-            nodes.Add(new Node(perceptrons[i], Color.cyan, Color.magenta, obj));
+            nodes.Add(new Node(perceptrons[i], Color.yellow, Color.grey, obj));
         }
         
         // Output Layer
@@ -72,7 +72,7 @@ public class Visualizer : MonoBehaviour
             var obj = Instantiate(this.nodeObj, panelTransform);
             obj.GetComponent<RectTransform>().sizeDelta = new Vector2(imageSize, imageSize);
             obj.GetComponent<RectTransform>().anchoredPosition = new Vector2(topRight.x, y);
-            nodes.Add(new Node(perceptrons[perceptrons.Count - outputs + i], Color.cyan, Color.magenta, obj));
+            nodes.Add(new Node(perceptrons[perceptrons.Count - outputs + i], Color.yellow, Color.grey, obj));
         }
         
         // Hidden Layers
@@ -84,7 +84,7 @@ public class Visualizer : MonoBehaviour
             var obj = Instantiate(this.nodeObj, panelTransform);
             obj.GetComponent<RectTransform>().sizeDelta = new Vector2(imageSize, imageSize);
             obj.GetComponent<RectTransform>().anchoredPosition = new Vector2(Random.Range(minX, maxX), Random.Range(-topRight.y, topRight.y));
-            nodes.Add(new Node(perceptrons[i], Color.cyan, Color.magenta, obj));
+            nodes.Add(new Node(perceptrons[i], Color.yellow, Color.grey, obj));
         }
 
         // Create dictionary to setup edges
@@ -101,7 +101,7 @@ public class Visualizer : MonoBehaviour
                 float weight = connection.Value;
                 var terminal = connection.Key;
                 var obj = Instantiate(edgeObj, panelTransform);
-                var edge = new Edge(node, nodeDictionary[terminal], Color.cyan, Color.magenta, obj);
+                var edge = new Edge(node, nodeDictionary[terminal], Color.yellow, Color.grey, obj);
                 edges.Add(edge);
             }
         }
@@ -146,7 +146,9 @@ public class Visualizer : MonoBehaviour
             image.color = Color.Lerp(negativeMaxColor, positiveMaxColor, t);
             
             // node size
-            var scale = Mathf.Abs(t) < 0.5f ? Vector3.one * 0.5f : Vector3.one * Mathf.Abs(t);
+            var scale = Mathf.Abs(perceptron.Value) < 0.5f ? Vector3.one * 0.5f 
+                : Mathf.Abs(perceptron.Value) <= 1f ? Vector3.one * Mathf.Abs(perceptron.Value)
+                : Vector3.one;
             scale.z = 1f;
             var scaleT = 0.5f;
             rectTransform.localScale = Vector3.Lerp(rectTransform.localScale, scale, scaleT);
@@ -224,8 +226,9 @@ public class Visualizer : MonoBehaviour
             value = origin.perceptron.Value;
             var t = value >= 1f ? 1f : (value < -1f ? 0f : ((value + 1f) / 2f));
             var defaultWidth = 5f;
-            var width = Mathf.Abs(t) * defaultWidth;
+            var width = Mathf.Abs(value) * defaultWidth;
             width = width <= 1f ? 1f : width;
+            width = width > defaultWidth ? defaultWidth : width;
 
             // Set the color of the line based on the value
             image.color = Color.Lerp(negativeMaxColor, positiveMaxColor, t);
@@ -253,7 +256,7 @@ public class Visualizer : MonoBehaviour
             return;
 
         Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var col = Physics2D.OverlapCircleAll(mousePosition, 2f, agentLayer);
+        var col = Physics2D.OverlapCircleAll(mousePosition, 10f, agentLayer);
 
         if (col.Length == 0)
             return;
@@ -271,7 +274,7 @@ public class Visualizer : MonoBehaviour
         }
 
         // Select closest agent
-        var agent = closestCollider.GetComponent<ShooterBehaviour>();
+        var agent = closestCollider.GetComponent<DroneBehaviour>();
 
         Deselect(); // Clear current visualization
 
