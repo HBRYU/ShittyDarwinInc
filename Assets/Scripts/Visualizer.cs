@@ -9,7 +9,7 @@ using Random = UnityEngine.Random;
 public class Visualizer : MonoBehaviour
 {
     public GameObject sampleTarget;
-    public NeuralNetwork targetNeuralNetwok;
+    public NeuralNetwork targetNeuralNetwork;
     public Vector2 topRight;
     public float bezelRatio = 0.1f;
     public GameObject nodeObj, edgeObj;
@@ -280,7 +280,7 @@ public class Visualizer : MonoBehaviour
 
         Setup(agent.nn);
 
-        targetNeuralNetwok = agent.nn;
+        targetNeuralNetwork = agent.nn;
     }
 
     public void Deselect()

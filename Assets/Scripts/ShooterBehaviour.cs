@@ -155,7 +155,7 @@ public class ShooterBehaviour : MonoBehaviour
 
     public void Die()
     {
-        if (visualizer != null && visualizer.targetNeuralNetwok == nn)
+        if (visualizer != null && visualizer.targetNeuralNetwork == nn)
             visualizer.Deselect();
             
         //WarManager.TeamSurvivors[team].Remove(gameObject);

@@ -14,59 +14,86 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Name: Drone
   Type: 1
-  Inputs: 6
+  Inputs: 7
   Outputs: 4
   Perceptrons:
-  - Bias: 0.755353
+  - Bias: 1.3210481
+    ConnectedPerceptronIndices: 1100000009000000
+    Weights:
+    - -2.0036063
+    - -0.00042588194
+  - Bias: -0.10092008
+    ConnectedPerceptronIndices: 07000000
+    Weights:
+    - -0.06370036
+  - Bias: -7.1818566
+    ConnectedPerceptronIndices: 12000000
+    Weights:
+    - -0.084536046
+  - Bias: -0.6986068
     ConnectedPerceptronIndices: 08000000
     Weights:
-    - 0.011807373
-  - Bias: 0.37369093
-    ConnectedPerceptronIndices: 0a000000
+    - 1.1994685
+  - Bias: -8.861148
+    ConnectedPerceptronIndices: 0f00000005000000090000000e000000
     Weights:
-    - -0.045724303
-  - Bias: -0.0442619
-    ConnectedPerceptronIndices: 080000000a0000000b000000
+    - -0.48534048
+    - -0.01843248
+    - -0.015759159
+    - -0.000075466116
+  - Bias: 3.05942
+    ConnectedPerceptronIndices: 09000000
     Weights:
-    - -0.020390084
-    - 0.02686561
-    - -1.48563
-  - Bias: -0.8845256
-    ConnectedPerceptronIndices: 060000000b000000
+    - 0.3152488
+  - Bias: 6.5928802
+    ConnectedPerceptronIndices: 07000000
     Weights:
-    - -0.033594638
-    - 1.3118831
-  - Bias: 0.016561313
-    ConnectedPerceptronIndices: 0700000008000000090000000a000000
+    - 3.684903
+  - Bias: 0.32788873
+    ConnectedPerceptronIndices: 0f000000
     Weights:
-    - -0.27084616
-    - 1.7911656
-    - 0.69113684
-    - 0.00023416844
-  - Bias: 0.078143336
-    ConnectedPerceptronIndices: 090000000a0000000b000000
+    - 3.0162764
+  - Bias: 1.539916
+    ConnectedPerceptronIndices: 1000000009000000
     Weights:
-    - -0.7114337
-    - 0.038755875
-    - -1.4865537
-  - Bias: 0.6327452
-    ConnectedPerceptronIndices: 0a0000000b000000
+    - -0.3204186
+    - 0.71767265
+  - Bias: -5.6122136
+    ConnectedPerceptronIndices: 12000000
     Weights:
-    - 0.5789019
-    - -0.053728584
-  - Bias: 0.288967
-    ConnectedPerceptronIndices: 0a000000
+    - 1.1393158
+  - Bias: -3.4057453
+    ConnectedPerceptronIndices: 11000000
     Weights:
-    - -0.0028457972
-  - Bias: 0.034460444
-    ConnectedPerceptronIndices: 
-    Weights: []
-  - Bias: -0.07342039
-    ConnectedPerceptronIndices: 
-    Weights: []
-  - Bias: -0.89188033
-    ConnectedPerceptronIndices: 
-    Weights: []
-  - Bias: 0.1882751
+    - -0.035204485
+  - Bias: -4.2700157
+    ConnectedPerceptronIndices: 10000000
+    Weights:
+    - -1.0639255
+  - Bias: -4.019193
+    ConnectedPerceptronIndices: 12000000
+    Weights:
+    - -0.06796106
+  - Bias: -5.6670785
+    ConnectedPerceptronIndices: 0f000000
+    Weights:
+    - -0.76800585
+  - Bias: -2.6423016
+    ConnectedPerceptronIndices: 12000000
+    Weights:
+    - 1.9083104
+  - Bias: -2.101401
+    ConnectedPerceptronIndices: 11000000
+    Weights:
+    - 2.746098
+  - Bias: -11.607959
+    ConnectedPerceptronIndices: 11000000
+    Weights:
+    - 0.00044970613
+  - Bias: -2.2742245
+    ConnectedPerceptronIndices: 12000000
+    Weights:
+    - -0.266294
+  - Bias: -0.46715558
     ConnectedPerceptronIndices: 
     Weights: []

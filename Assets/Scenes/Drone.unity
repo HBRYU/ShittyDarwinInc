@@ -2874,11 +2874,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetTransform: {fileID: 567010511}
-  episodeTime: 10
+  episodeTime: 5
   dt: 0.02
   useRealTime: 0
   droneObj: {fileID: 743623717186748519, guid: 2c732662f1ee18c4884be74bc900cda8, type: 3}
   generation: 1
+  preservedTopAgents: 10
+  initialMutantRatio: 0.25
+  finalMutantRatio: 0
+  maxGeneration: 5000
+  initialConnectionMutationRate: 0.05
+  finalConnectionMutationRate: 0.025
+  initialPerceptronMutationRate: 0.05
+  finalPerceptronMutationRate: 0.02
+  maxGenerationForMutationRate: 5000
+  initialBoxSize: 2
+  finalBoxSize: 3
+  logFileName: log.txt
 --- !u!1001 &465665178
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3354,6 +3366,7 @@ GameObject:
   - component: {fileID: 567010509}
   - component: {fileID: 567010513}
   - component: {fileID: 567010512}
+  - component: {fileID: 567010514}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -3503,6 +3516,20 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!114 &567010514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 567010508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7361d5c556aaf804cafe3542716f14a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 3
+  cameraSizeDelta: 3
 --- !u!1001 &574778158
 PrefabInstance:
   m_ObjectHideFlags: 0

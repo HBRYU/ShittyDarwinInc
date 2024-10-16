@@ -95,7 +95,7 @@ public class Agent : MonoBehaviour
         health = lifespanTimer / lifespan;
         if (health <= 0f)
         {
-            if (visualizer.targetNeuralNetwok == nn)
+            if (visualizer.targetNeuralNetwork == nn)
                 visualizer.Deselect();
             
             EntityManager.DestroyAgent();
