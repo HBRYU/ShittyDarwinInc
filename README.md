@@ -1,4 +1,4 @@
-#As the name suggests, this is not a professional research project.
+# As the name suggests, this is not a professional research project.
 
 Rather, this is a samll hobby simulation that developed into something interesting enough to share.
 
