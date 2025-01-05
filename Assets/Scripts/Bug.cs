@@ -41,7 +41,7 @@ public class Bug : MonoBehaviour
         if (col.Length == 0)
         {
             var rad = Random.Range(0, 2 * Mathf.PI);
-            _rb.velocity = _rb.velocity * 0.5f + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * (0.5f * speed);
+            _rb.linearVelocity = _rb.linearVelocity * 0.5f + new Vector2(Mathf.Cos(rad), Mathf.Sin(rad)) * (0.5f * speed);
             return;
         }
         
@@ -50,7 +50,7 @@ public class Bug : MonoBehaviour
             sum += (collider.transform.position - transform.position) / col.Length;
         }
 
-        _rb.velocity = -sum.normalized * speed;
+        _rb.linearVelocity = -sum.normalized * speed;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

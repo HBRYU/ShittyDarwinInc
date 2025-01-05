@@ -68,7 +68,7 @@ public class Agent : MonoBehaviour
         
         rb.angularVelocity = rotationalVelocity * rotSpeedMultiplier;
         var eulerAngles = transform.eulerAngles;
-        rb.velocity = new Vector2(Mathf.Cos(eulerAngles.z * Mathf.Deg2Rad), Mathf.Sin(eulerAngles.z * Mathf.Deg2Rad)) * (forwardVelocity * speedMultiplier);
+        rb.linearVelocity = new Vector2(Mathf.Cos(eulerAngles.z * Mathf.Deg2Rad), Mathf.Sin(eulerAngles.z * Mathf.Deg2Rad)) * (forwardVelocity * speedMultiplier);
     }
     
     private float[] HandleRayCast()
@@ -89,7 +89,7 @@ public class Agent : MonoBehaviour
     private void HandleHealth()
     {
         lifespanTimer -= Time.fixedDeltaTime;
-        lifespanTimer -= Time.fixedDeltaTime * rb.velocity.sqrMagnitude * mobilityLifeReductionCoeff;
+        lifespanTimer -= Time.fixedDeltaTime * rb.linearVelocity.sqrMagnitude * mobilityLifeReductionCoeff;
         lifespanTimer -= Time.fixedDeltaTime * weightCostLifeReductionCoeff * nn.WeightCost;
         
         health = lifespanTimer / lifespan;

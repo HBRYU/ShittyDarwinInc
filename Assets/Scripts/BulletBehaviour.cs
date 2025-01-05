@@ -34,7 +34,7 @@ public class BulletBehaviour : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.velocity = transform.right * speed;
+        rb.linearVelocity = transform.right * speed;
         lifeSpanTimer -= Time.fixedDeltaTime;
         if (lifeSpanTimer < 0f || !ParentCollider)
         {

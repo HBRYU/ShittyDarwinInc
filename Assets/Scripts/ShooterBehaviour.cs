@@ -106,7 +106,7 @@ public class ShooterBehaviour : MonoBehaviour
         bool fire = outputArray[3] >= 0f;
         
         rb.angularVelocity = rotationalVelocity * rotSpeedMultiplier;
-        rb.velocity = (transform.right * forwardVelocity + transform.up * lrVelocity) * speedMultiplier;
+        rb.linearVelocity = (transform.right * forwardVelocity + transform.up * lrVelocity) * speedMultiplier;
 
         if(fire)
             HandleGun();
@@ -135,7 +135,7 @@ public class ShooterBehaviour : MonoBehaviour
     private void HandleHealth()
     {
 
-        float reduction = Time.fixedDeltaTime * (1 + rb.velocity.sqrMagnitude * mobilityLifeReductionCoeff + weightCostLifeReductionCoeff * nn.WeightCost);
+        float reduction = Time.fixedDeltaTime * (1 + rb.linearVelocity.sqrMagnitude * mobilityLifeReductionCoeff + weightCostLifeReductionCoeff * nn.WeightCost);
         
         health -= maxHealth * reduction / lifespan;
 
